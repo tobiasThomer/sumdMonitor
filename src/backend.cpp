@@ -80,21 +80,33 @@ void BackEnd::onReadyRead()
     while (true)
     {
         if (start == -1) return;
+
+
         if (data.size() < start+2)
         {
+            if (start == 0) return;
+
             start = data.lastIndexOf(QByteArrayLiteral("\xA8"), start-1);
             continue;
         }
 
+
         if (data.at(start+1) != (char)0x01)
         {
-            start = data.lastIndexOf(QByteArrayLiteral("\xA8"), start-1);
-            continue;
+            if (data.at(start +1) != (char)0x81)
+            {
+                if (start == 0) return;
+
+                start = data.lastIndexOf(QByteArrayLiteral("\xA8"), start-1);
+                continue;
+            }
         }
 
         frameSize = static_cast<uint8_t>(data.at(start+2)) * 2 + 5;
         if (data.size() - start < frameSize)
         {
+            if (start == 0) return;
+
             start = data.lastIndexOf(QByteArrayLiteral("\xA8"), start-1);
             continue;
         }
